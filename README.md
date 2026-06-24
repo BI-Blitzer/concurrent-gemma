@@ -1,68 +1,66 @@
 # Concurrent Gemma — Local RTX Edition
 
-**A Windows-first, Gradio + Ollama adaptation** of the original multi-agent demo from the Google Gemma Cookbook.
+<p align="center">
+  <img src="concurrent-gemma.gif" alt="Concurrent Gemma Demo" width="85%"/>
+</p>
 
-> **Fork lineage**: This project is derived from  
-> https://github.com/google-gemma/cookbook/tree/main/apps/concurrent  
-> Core orchestration, scenarios, planning prompts, and gallery rendering are based on the original work.
+> **This is a fork / local adaptation** of the excellent concurrent multi-agent demo from the official Google Gemma Cookbook:
+>
+> Original: https://github.com/google-gemma/cookbook/tree/main/apps/concurrent
+>
+> A full demo video is also included: [concurrent-gemma.mp4](concurrent-gemma.mp4)
 
-Run multiple concurrent Gemma (or compatible) agents locally with Ollama, watch them stream in real time, and get beautiful visual results.
+**A Windows-first, Gradio + Ollama adaptation** for running multiple Gemma agents (9B/27B) in true parallel using a local Ollama server.
 
-Optimized for **RTX 50-series 16 GB** cards (light & fast defaults: 3–4 agents @ 8k–16k context).
+## Requirements
 
-## License
+- **OS**: Windows 10/11 (primary target; PowerShell + CMD support)
+- **Python**: 3.10 or newer
+- **Ollama**: Latest version installed ([ollama.com](https://ollama.com))
+  - Recommended models: `gemma2:9b` or `gemma2:27b` (pull with `ollama pull gemma2:9b`)
+  - Other models work but performance and concurrency may vary
+- **Hardware**: NVIDIA RTX GPU recommended (16 GB+ VRAM ideal for 3–4 agents at 8k–16k context)
+- **Dependencies**: See [requirements.txt](requirements.txt) (mainly `gradio` and `ollama` Python client)
 
-MIT License (see [LICENSE](LICENSE)).
-
-This is a derivative work. The original Google Gemma Cookbook concurrent demo is part of a project licensed under Apache-2.0.
-
-## Features
-
-- **Gradio web dashboard** — single localhost app (no Terminal grid hell on Windows)
-- **Full live partial text** — every agent streams its output as it generates
-- **Tailwind-powered cards** — consistent modern dark aesthetic (NVIDIA/Windows vibe)
-- **Four ready scenarios**:
-  - SVG Art Gallery
-  - Translation Grid
-  - Code Gallery (multi-language)
-  - ASCII Art Gallery
-- Easy to extend with new scenarios
-- Hardware-aware defaults (toggleable)
-
-## Quick Start (Windows)
-
-### 1. Prerequisites
-
-- Python 3.10+
-- [Ollama](https://ollama.com) installed and running
-- Ollama running with a suitable model (you currently have Qwen/Llama models; Gemma recommended for the project name):
-
-```powershell
-# You currently have these models (example):
-ollama list
-
-# To use a Gemma model (recommended for the spirit of this project):
-ollama pull gemma2:9b
-# or
-ollama pull gemma2:27b   # heavier, test with fewer agents
-
-# The app currently defaults to qwen2.5:14b since that's what was installed.
-```
-
-**For best parallelism**, set this before launching Ollama (or in the same terminal):
-
+For best results with multiple agents:
 ```powershell
 $env:OLLAMA_NUM_PARALLEL = "4"
 ```
 
-### 2. Run the app
+## Quickstart
+
+### 1. Install Prerequisites
 
 ```powershell
-# Double-click or:
+# 1. Install Ollama from https://ollama.com (if not already)
+ollama --version
+
+# 2. Pull a Gemma model (recommended)
+ollama pull gemma2:9b
+# or for bigger model:
+ollama pull gemma2:27b
+
+# 3. (Optional but recommended for concurrency) Set parallelism before starting Ollama
+$env:OLLAMA_NUM_PARALLEL = "4"
+ollama serve   # Run this in a separate terminal if managing manually
+```
+
+### 2. Run the App
+
+**Easiest (recommended on Windows):**
+
+```powershell
+# Double-click run.bat or from terminal:
 .\run.bat
 ```
 
-Or manually:
+`run.bat` will:
+- Detect if Ollama is already running (and respect it)
+- Create/activate venv
+- Install dependencies
+- Launch the Gradio dashboard
+
+**Manual way:**
 
 ```powershell
 python -m venv .venv
@@ -71,24 +69,41 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The app opens at http://127.0.0.1:7860
+The dashboard will open automatically in your browser at `http://127.0.0.1:7860` (or next available port).
 
-### 3. Use it
+### 3. Use It
 
-1. Choose a scenario
-2. Enter a topic
-3. Adjust agents (2–6) and context if desired
-4. Click **RUN CONCURRENT AGENTS**
-5. Watch live streaming output + metrics
-6. Enjoy the final Tailwind gallery
+1. Select a **Scenario** (code, explanations, translate, ascii, fractals)
+2. Enter a **Topic / Prompt**
+3. Adjust **Concurrent Agents**, Context, Temp, Top P
+4. Click **▶ RUN CONCURRENT AGENTS**
+5. Watch **live partial text** streaming in real time in the Live Feed
+6. When finished, enjoy the beautiful final **Tailwind gallery**
+
+## Features
+
+- **Gradio web dashboard** — single localhost app (no Terminal grid hell on Windows)
+- **Full live partial text** — every agent streams its output as it generates
+- **Tailwind-powered cards** — consistent modern dark aesthetic (NVIDIA/Windows vibe)
+- **Five ready scenarios**:
+  - SVG / Fractal Art Gallery
+  - Translation Grid
+  - Code Gallery (multi-language)
+  - ASCII Art Gallery
+  - Multiple Explanations
+- Easy to extend with new scenarios
+- Hardware-aware defaults (toggleable)
 
 ## Controls & Hardware Sizing
 
-| Setting          | Recommended (16 GB) | Range     | Notes |
-|------------------|---------------------|-----------|-------|
-| Agents           | **4**               | 2–6       | 5–6 may still work with light quants |
-| Context          | **16384**           | 8k / 16k / 24k | Higher = more VRAM |
-| Model            | `gemma-4-26b-a4b-it` | — | Use a 4-bit or IQ quant when possible |
+| Setting          | Recommended (16 GB VRAM) | Range          | Notes |
+|------------------|--------------------------|----------------|-------|
+| Concurrent Agents | **3–4**                 | 1–8            | 27B models → max ~3 agents for best speed |
+| Context (num_ctx) | **8192–16384**          | 4k–32k         | Higher uses more VRAM |
+| Temperature      | **0.7**                 | 0.0–1.5        | Lower = more deterministic |
+| Top P            | **0.9**                 | 0.1–1.0        | Nucleus sampling |
+
+**Tip**: Use the **🧹 Free port 11434** button in the UI if you get bind errors, or let `run.bat` manage Ollama automatically.
 
 ## Architecture (fork notes)
 
@@ -152,9 +167,20 @@ Use the Apply button or restart the serve after setting the variable.
 
 ## Credits & Lineage
 
-- Original multi-agent demo, scenarios, prompts, and rendering approach:  
-  [google-gemma/cookbook/tree/main/apps/concurrent](https://github.com/google-gemma/cookbook/tree/main/apps/concurrent)
-- This repo: Gradio dashboard, Ollama backend, live streaming, Windows packaging, and dark theme adaptations.
+**Original work:**
+- Multi-agent demo, scenarios, planning prompts, and rendering approach:  
+  [google-gemma/cookbook/tree/main/apps/concurrent](https://github.com/google-gemma/cookbook/tree/main/apps/concurrent) (Apache-2.0)
+
+**This adaptation:**
+- Gradio web UI with live streaming cards
+- Local Ollama backend (optimized for Windows + RTX)
+- `run.bat` launcher with smart Ollama management
+- Matrix/dark theme + Tailwind cards
+- Robust port handling and parallelism controls
+
+I will credit the original publicly when sharing on X / LinkedIn.
+
+This project is MIT licensed (see LICENSE). The original Google Gemma Cookbook content remains under its original license.
 
 ## License
 
@@ -162,4 +188,4 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Enjoy building with multiple minds at once.
+Enjoy building with multiple minds at once! 🚀

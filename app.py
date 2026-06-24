@@ -746,7 +746,8 @@ if __name__ == "__main__":
     app = create_app()
     app.launch(
         server_name="127.0.0.1",
-        server_port=7860,
+        # server_port omitted → Gradio will auto-pick the next free port (usually 7860 or 7861)
+        # You can force a port with:  set GRADIO_SERVER_PORT=7861 && python app.py
         share=False,
         inbrowser=True,
         css=CUSTOM_CSS,

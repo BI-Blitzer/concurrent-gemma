@@ -47,3 +47,21 @@ Thumbs.db
 .env
 *.gguf
 *.bin
+*.key
+secrets/
+*.pem
+
+# Gradio / local artifacts
+.gradio/
+*.tmp
+*.temp
+
+# Screenshots and outputs (uncomment if you want them in the repo)
+# Output.png
+# Screenshot*.png
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+*.bak
